@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="animEngineStarter/animEngineStarter.vcxproj" Id="f20e21cb-a16f-4ed4-8cb5-ea8a712a9e05" />
+  <Project Path="C:/Users/facade/source/repos/animEngineDLL/animEngineDLL.vcxproj" Id="419b0d56-5c51-44ca-a749-7f70cb897ef4" />
+</Solution>
