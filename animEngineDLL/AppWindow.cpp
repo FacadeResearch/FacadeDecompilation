@@ -15,8 +15,6 @@ HPALETTE AppWindow::g_hPalette = NULL;
 
 int AppWindow::g_windowHeight = 768;
 int AppWindow::g_windowWidth = 1024;
-HDC AppWindow::g_hDC = nullptr;
-HGLRC AppWindow::g_hRC = nullptr;
 
 bool AppWindow::g_bAntiAliasing = false;
 bool AppWindow::g_IsInactive = false;
@@ -111,91 +109,135 @@ void AppWindow::InitOpenGLState() {
 }
 
 LRESULT CALLBACK AppWindow::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    std::cout << "u msg : " << uMsg << std::endl;
+    int result = 0;
 
-    if (uMsg == WM_CREATE) {
-        g_windowWidth = LOWORD(lParam);
+    if (uMsg > WM_QUERYNEWPALETTE) {
+        switch (uMsg) {
+            case WM_PALETTECHANGED:
+                if (!g_hPalette || (HWND)wParam == hWnd) {
+                    return 0;
+                }
 
-        HDC hdc = GetDC(hWnd);
-        g_hDC = hdc;
-        SetupPixelFormat(hdc);
-
-        g_hRC = wglCreateContext(hdc);
-        wglMakeCurrent(hdc, g_hRC);
-
-        g_hPalette = CreateEnginePalette(hdc);
-        InitOpenGLState();
-        return 0;
-    }
-
-    if (uMsg == WM_DESTROY) {
-        dprintf("\n### AnimEngine cleaning up\n");
-        SoundSystem::StopAllMP3s();
-        if (AppWindow::g_bAblDisconnect) {
-            ErrorMessage((uint8_t*)"We're sorry, Facade is having trouble running, possibly because other applications are runni"
-                "ng, or some other factor limiting the CPU available.\n"
-                "\n"
-                "Please try running Facade again, after closing other applications or restarting.\n"
-                "\n"
-                "Also visit www.interactivestory.net for bug fixes and patches.");
+                SelectPalette(g_HDC, g_hPalette, FALSE);
+                RealizePalette(g_HDC);
+                UpdateColors(g_HDC);
+                result = 0;
+            break;
+            case WM_USER:
+                //sub_10001FAA(dword_1097947C);
+                return 0;
+            case 0x401: //Ida says DDM_DRAW (?)
+                // sub_10002324(dword_1097947C);
+                return 0;
+            case 0x402: //DDM_CLOSE
+                //sub_10001FAA(dword_10979480);
+                return 0;
+            case 0x403: //DDM_BEGIN
+                //sub_10002324(dword_10979480);
+                return 0;
+            case 0x40D: //PBM_GETSTEP
+                //sub_100018CF();
+                return 0;
+            default:
+                return DefWindowProcA(hWnd, uMsg, wParam, lParam);
         }
-        EventLog::OutputEventLog(1);
-        dprintf("Deallocating globals");
-        return 0;
     }
-
-    if (uMsg == WM_PAINT) {
-        //data_1082d58c what is this? //&& g_SomeOtherFlag == 0
-
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hWnd, &ps);
-
-        if (g_IsInactive) {
-            EndPaint(hWnd, &ps);
-            //SendMessageA(Engine::g_Window, 0x10, 0, 0); //WM_CLOSE is 0x10? wtf?
-            return 0;
+    else {
+        if (uMsg == WM_QUERYNEWPALETTE) {
+            if (g_hPalette) {
+                SelectPalette(g_HDC, g_hPalette, FALSE);
+                UINT result = RealizePalette(g_HDC);
+                InvalidateRect(hWnd, NULL, FALSE);
+                return result;
+            }
         }
+        else if (uMsg > WM_ACTIVATE) {
+            switch (uMsg) {
+                case WM_PAINT: {
+                    //to-do
+                    //data_1082d58c what is this? //&& g_SomeOtherFlag == 0
 
-        uint32_t frameStart = GetTickCount();
+                    PAINTSTRUCT ps;
+                    HDC hdc = BeginPaint(hWnd, &ps);
 
-        Engine::ChangeSize();
+                    if (g_IsInactive) {
+                        EndPaint(hWnd, &ps);
+                        SendMessageA(Engine::g_Window, WM_CLOSE, 0, 0); //WM_CLOSE is 0x10? wtf?
+                        return 0;
+                    }
 
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                    uint32_t frameStart = GetTickCount();
 
-        Engine::LoadingMessage();
-        Engine::UpdateFadeEffect();
-        glFlush();
-        SwapBuffers(g_hDC);
+                    Engine::ChangeSize();
 
-        //CalculateFPS(frameStart);
+                    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (g_SleepTime > 0) Sleep(g_SleepTime);
+                    Engine::LoadingMessage();
+                    Engine::UpdateFadeEffect();
+                    glFlush();
+                    SwapBuffers(g_HDC);
 
-        EndPaint(hWnd, &ps);
-        InvalidateRect(hWnd, NULL, FALSE);
-        return 0;
-    }
+                    //CalculateFPS(frameStart);
 
-    if (uMsg >= 0x311 && uMsg <= (0x311 + 0xFC)) {
-        uint8_t simplifiedMsg = *(uint8_t*)(uMsg + 0x100b2a50);
+                    if (g_SleepTime > 0) Sleep(g_SleepTime);
 
-        switch (simplifiedMsg) {
-            case 1: // Likely WM_MOVE
-                //sub_10058e10(g_pInputManager);
-                break;
-            case 2: // Likely WM_MOVING
-                //sub_10053d80(g_pInputManager);
-                break;
-            case 3: // Likely WM_SIZE
-                //sub_10058e10(g_pRendererManager);
-                break;
-            case 4: // Likely WM_SIZING
-                //sub_10053d80(g_pRendererManager);
-                break;
+                    EndPaint(hWnd, &ps);
+                    InvalidateRect(hWnd, NULL, FALSE);
+                }
+                    break;
+                case WM_MOUSEFIRST:
+                    //dword_1083F5E8 = (unsigned __int16)lParam;
+                    //dword_1083F5EC = HIWORD(lParam);
+                    break;
+                case WM_LBUTTONDOWN:
+                    // byte_10979468 = 1;
+                    break;
+                default:
+                    return DefWindowProcA(hWnd, uMsg, (WPARAM)wParam, lParam);
+            }
         }
-        return 0;
+        else {
+            switch (uMsg) {
+                case WM_ACTIVATE:
+                    break;
+                case WM_CREATE: {
+                    g_windowWidth = LOWORD(lParam);
+
+                    HDC hdc = GetDC(hWnd);
+                    g_HDC = hdc;
+                    SetupPixelFormat(hdc);
+
+                    g_HRC = wglCreateContext(hdc);
+                    wglMakeCurrent(hdc, g_HRC);
+
+                    g_hPalette = CreateEnginePalette(hdc);
+                    InitOpenGLState();
+                }
+                    break;
+                case WM_DESTROY: {
+                    dprintf("\n### AnimEngine cleaning up\n");
+                    SoundSystem::StopAllMP3s();
+                    if (AppWindow::g_bAblDisconnect) {
+                        ErrorMessage((uint8_t*)"We're sorry, Facade is having trouble running, possibly because other applications are runni"
+                            "ng, or some other factor limiting the CPU available.\n"
+                            "\n"
+                            "Please try running Facade again, after closing other applications or restarting.\n"
+                            "\n"
+                            "Also visit www.interactivestory.net for bug fixes and patches.");
+                    }
+                    EventLog::OutputEventLog(1);
+                    dprintf("Deallocating globals");
+                }
+                    break;
+                case WM_SIZE:
+                    //sub_100010B4((unsigned __int16)lParam, HIWORD(lParam));
+                    break;
+                default:
+                    return DefWindowProcA(hWnd, uMsg, (WPARAM)wParam, lParam);
+            }
+        }
     }
 
-    return DefWindowProcA(hWnd, uMsg, wParam, lParam);
+    return result;
 }

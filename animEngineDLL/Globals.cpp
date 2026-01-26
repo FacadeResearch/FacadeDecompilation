@@ -6,6 +6,7 @@
 
 HWND g_Window = NULL;
 HDC g_HDC = NULL;
+HGLRC g_HRC = NULL;
 
 extern "C" {
     int DSound_Init() {

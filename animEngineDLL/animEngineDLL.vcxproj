@@ -150,6 +150,7 @@
     <ClCompile Include="XCursor.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EEventLogType.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EventLog.h" />
     <ClInclude Include="Globals.h" />

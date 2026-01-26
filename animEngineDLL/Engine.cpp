@@ -6,6 +6,7 @@
 #include <string>
 #include "EventLog.h"
 #include <ctime>
+#include "Globals.h"
 
 bool Engine::g_bPrintBetaInfo = false;
 bool Engine::g_bDSoundInitialized = false;
@@ -667,7 +668,7 @@ HRESULT Engine::DSound_Init() {
 }
 
 void Engine::InitGlobals() {
-    EventLog::Record(0, -1, "\n---------------------------\nInitting globals...");
+    dprintf("\n---------------------------\nInitting globals...");
     srand((unsigned int)time(NULL));
 
     g_numFramesRun = GetTickCount();

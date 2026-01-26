@@ -13,8 +13,6 @@ class AppWindow {
 		static int g_windowWidth, g_windowHeight;
 		static bool g_bAblDisconnect;
 		static HPALETTE g_hPalette;
-		static HDC g_hDC;
-		static HGLRC g_hRC;
 		static bool g_IsInactive;
 	private:
 		static HPALETTE CreateEnginePalette(HDC hdc);

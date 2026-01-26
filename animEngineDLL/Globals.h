@@ -6,6 +6,7 @@
 extern "C" {
     extern HWND g_Window;
     extern HDC g_HDC;
+    extern HGLRC g_HRC;
 
     int DSound_Init();
     int DSound_Shutdown();
