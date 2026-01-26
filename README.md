@@ -6,12 +6,12 @@ This decompilation uses symbols found in the MAC OS X release of the game to fil
 You will also need a copy of the original game's assets in order for this to work, an installer can be found on the Internet Archive [here](https://archive.org/details/facade-installer-1.1b).
 
 # Building
-Since this project is huge I don't expect you to have much luck building animEgineDLL with Visual Studio, so please use cmake <br.
+Since this project is huge I don't expect you to have much luck building animEgineDLL with Visual Studio, so please use cmake.
 
 ```
 mkdir build
 cd build
-cmake ..
+cmake .. -A Win32
 cmake --build . --config Release
 ```
 
