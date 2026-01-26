@@ -13,5 +13,7 @@ extern "C" {
     void InitGlobals();
     int dprintf(const char* msg, ...);
     int __cdecl ErrorMessage(uint8_t* bytes);
+    FILE* __cdecl fopen_UnixPath(char* filePath, const char* mode);
+    char* __cdecl UnixPath(char* __s2, char a2);
     int Keyboard_Init();
 }

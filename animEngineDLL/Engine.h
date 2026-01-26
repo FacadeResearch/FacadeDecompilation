@@ -4,41 +4,76 @@
 #include <dinput.h>
 #include <string>
 #include "SoundEntry.h"
+#include "SoundSource.h"
 #include <gl/GL.h>
 #include "Player.h"
 #include "XCursor.h"
+#include "TextureFilmstrip.h"
+#include "Zone.h"
+#include "Controller.h"
 
 struct Engine {
 	public:
-		static bool g_bPrintBetaInfo, g_stagePlayExists, g_bDSoundInitialized, g_bAtEndOfLoad, g_DebugBuild;
+		static bool g_bPrintBetaInfo, g_stagePlayExists, g_bDSoundInitialized, g_bAtEndOfLoad;
 		static float g_GlobalAlpha; // data_106988bc
 		static float g_FadeAlpha, g_FadeSpeed;
 		static int fadeCurtainInCtr; // data_106988e0
 		static bool bFadeCurtainOut;
 		static float g_gmf[256];
+		static int32_t g_startTime;
+		static bool g_bShouldRenderThisFrame;
+		static int g_SkipFramesCounter;
+		static int g_numZones;
+		static Zone g_zones[250];
+		static uint8_t g_fixedPathPlanGrid[90][90];
+		static int g_printMapCtr;
+		static bool g_bAssertionThrown;
+		static bool g_bAllQuadLineOutline;
+		static bool g_bAllCircleOutline;
+		static bool g_bCinematographyOn;
+		static int g_frameWhenLastCinematographyMove;
+		static int g_framePlayerLastMoved;
+		static bool g_bRequestAutoFraming;
+		static Controller g_autoTurnController;
+		static float  g_autoTurnAmount;
 		static HWND g_Window;
 		static Player g_Player;
 		static HDC g_HDC;
 		static GLuint g_BitmapFontBase;
-		static GLuint g_LoadingTextureID;
+		static TextureFilmstrip g_TextureFilmstrips[18448];
 		static LPDIRECTINPUTDEVICE8 g_pKeyboard;
 		static LPDIRECTINPUT8 g_pDI;
+		static SoundSource g_soundSource;
 		static LPDIRECTSOUND g_pDS;
-		static SoundEntry g_SoundBank[256];
 		static int g_ticksIntroStarted;
 		static int g_numFramesRun;
-		static HRESULT Keyboard_Init();
-		static HRESULT DSound_Init();
+		static float g_playerTransAmt, g_playerRotAmt;
+		static bool g_bPlayerRotateLeft, g_bPlayerRotateRight, g_bPlayerMoveForwards;
+		static bool g_bPlayerMoveBackwards, g_bPlayerMoveUpwards, g_bPlayerMoveDownwards;
+		static int g_AutoMovePlayerStatus;
+		static bool g_bSeatedOnCouch, g_bTripCarry;
+		static float g_autoMovePlayerPt[3]; // X, Y, Z
+		static float g_autoMovePlayerRot;
+		static Controller g_PlayerXController;
+		static Controller g_PlayerYController;
+		static Controller g_PlayerZController;
+		static Controller g_PlayerRotController;
 		static XCursor g_pCursor;
 		static void InitGlobals();
 		static void SetColorFromIndex(int colorIndex);
-		static void LoadSoundManifest(const char* path);
 		static void DrawArbitraryScreenText(const char* text, float xPos, float yPos, int maxWidth, GLfloat scale, float zOffset, int colorIndex);
 		static void StartFade(float speed);
+		static char* __cdecl LoadTextureFilmstrip(int index);
 		static void UpdateFadeEffect();
 		static void LoadingMessage();
 		static void DrawRedCurtain();
+		static int BuildBitmapFont();
+		static int InitCinematography();
+		static int InitPlayerNavigation();
+		static unsigned __int8* __cdecl LoadTexture(const char* srcPath, bool generateAlpha, int minFilter, int magFilter, int wrapMode);
+		static void* __cdecl LoadDIBitmap(const char* filename, void** outDibInfo);
 		static void CutToBlack();
+		static char* InitEnvironment();
 		static int* ChangeSize();
 	private:
 		static int ctr;

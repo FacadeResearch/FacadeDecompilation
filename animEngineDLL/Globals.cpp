@@ -35,6 +35,18 @@ extern "C" {
         return result; //SDL_ShowCursor();
     }
 
+    FILE* __cdecl fopen_UnixPath(char* filePath, const char* mode)
+    {
+        char* path = UnixPath(filePath, *mode != 114);
+        return fopen(path, mode);
+    }
+
+    char* __cdecl UnixPath(char* __s2, char a2)
+    {
+        //to-do
+        return __s2;
+    }
+
     int Keyboard_Init() {
         return Input::Keyboard_Init();
     }

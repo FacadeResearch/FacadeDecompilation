@@ -45,3 +45,7 @@ x86/
 *.ncb
 *.user
 *.filters
+
+# CMake output
+build
+
