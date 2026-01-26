@@ -5,10 +5,17 @@
 SoundSource::SoundSource() {
     this->m_vtable = 0;
     this->soundCount = 0;
+    this->soundList = new char[5000 * 256];
 
     memset(this->sourcePath, 0, sizeof(this->sourcePath));
     memset(this->baseSoundName, 0, sizeof(this->baseSoundName));
-    memset(this->soundList, 0, sizeof(this->soundList));
+    memset(this->soundList, 0, 5000 * 256);
+}
+
+SoundSource::~SoundSource() {
+    if (this->soundList) {
+        delete[] this->soundList;
+    }
 }
 
 int __cdecl SoundSource::InitSoundSource(char* srcPath)
@@ -41,7 +48,7 @@ int __cdecl SoundSource::InitSoundSource(char* srcPath)
             strcpy(this->baseSoundName, lineBuffer);
         }
         else {
-            strcpy(this->soundList[this->soundCount], lineBuffer);
+            strcpy(&this->soundList[this->soundCount * 256], lineBuffer);
         }
 
         this->soundCount++;

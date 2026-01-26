@@ -7,7 +7,8 @@ class SoundSource {
 		char sourcePath[256];
 		char baseSoundName[252];
 		int32_t soundCount;
-		char soundList[5000][256];
+		char* soundList;
 		SoundSource();
+		~SoundSource();
 		int __cdecl InitSoundSource(char* srcPath);
 };

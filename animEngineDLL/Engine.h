@@ -19,7 +19,7 @@ struct Engine {
 		static float g_FadeAlpha, g_FadeSpeed;
 		static int fadeCurtainInCtr; // data_106988e0
 		static bool bFadeCurtainOut;
-		static float g_gmf[256];
+		static float* g_gmf;
 		static int32_t g_startTime;
 		static bool g_bShouldRenderThisFrame;
 		static int g_SkipFramesCounter;
@@ -37,13 +37,13 @@ struct Engine {
 		static Controller g_autoTurnController;
 		static float  g_autoTurnAmount;
 		static HWND g_Window;
-		static Player g_Player;
+		static Player* g_Player;
 		static HDC g_HDC;
 		static GLuint g_BitmapFontBase;
-		static TextureFilmstrip g_TextureFilmstrips[18448];
+		static TextureFilmstrip* g_TextureFilmstrips;
 		static LPDIRECTINPUTDEVICE8 g_pKeyboard;
 		static LPDIRECTINPUT8 g_pDI;
-		static SoundSource g_soundSource;
+		static SoundSource* g_soundSource;
 		static LPDIRECTSOUND g_pDS;
 		static int g_ticksIntroStarted;
 		static int g_numFramesRun;
@@ -58,7 +58,7 @@ struct Engine {
 		static Controller g_PlayerYController;
 		static Controller g_PlayerZController;
 		static Controller g_PlayerRotController;
-		static XCursor g_pCursor;
+		static XCursor* g_pCursor;
 		static void InitGlobals();
 		static void SetColorFromIndex(int colorIndex);
 		static void DrawArbitraryScreenText(const char* text, float xPos, float yPos, int maxWidth, GLfloat scale, float zOffset, int colorIndex);

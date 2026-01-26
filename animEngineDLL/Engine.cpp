@@ -22,14 +22,16 @@ int Engine::g_ticksIntroStarted = 0;
 int Engine::fadeCurtainInCtr = 0;
 int Engine::g_numFramesRun = 0;
 
-float Engine::g_gmf[256] = { 0.0f };
+float* Engine::g_gmf = nullptr;
 
-TextureFilmstrip Engine::g_TextureFilmstrips[18448];
+SoundSource* Engine::g_soundSource = nullptr;
+
+TextureFilmstrip* Engine::g_TextureFilmstrips = nullptr;
 
 HDC Engine::g_HDC = NULL;
 HWND Engine::g_Window = NULL;
-XCursor Engine::g_pCursor = XCursor();
-Player Engine::g_Player = Player();
+XCursor* Engine::g_pCursor = NULL;
+Player* Engine::g_Player = NULL;
 
 LPDIRECTINPUTDEVICE8 Engine::g_pKeyboard = NULL;
 
@@ -37,8 +39,6 @@ GLuint Engine::g_BitmapFontBase = 0;
 
 LPDIRECTINPUT8 Engine::g_pDI = NULL;
 LPDIRECTSOUND Engine::g_pDS = NULL;
-
-SoundSource Engine::g_soundSource;
 
 float Engine::g_FadeAlpha = 0;
 float Engine::g_FadeSpeed = 0;
@@ -164,6 +164,11 @@ void Engine::DrawRedCurtain() {
 
 int Engine::BuildBitmapFont()
 {
+	if (g_gmf == nullptr) {
+		g_gmf = new float[256];
+		memset(g_gmf, 0, sizeof(float) * 256);
+	}
+
 	uint32_t startTick = GetTickCount();
 	dprintf("Building bitmap font...");
 
@@ -1197,6 +1202,8 @@ void Engine::SetColorFromIndex(int colorIndex) {
 }
 
 void Engine::InitGlobals() {
+	g_TextureFilmstrips = new TextureFilmstrip[18448];
+
 	dprintf("\n---------------------------\nInitting globals...");
 	srand((unsigned int)time(NULL));
 
@@ -1217,6 +1224,7 @@ void Engine::InitGlobals() {
 	InitEnvironment();
 	InitCinematography();
 	InitPlayerNavigation();
+
 	/*
 	v2 = (Sprite *)operator new((unsigned int)&loc_14894);
 	  Sprite::Sprite(v2);
@@ -1244,22 +1252,23 @@ void Engine::InitGlobals() {
 	  result = 0;
 	  memset(&g_curTextInput, 0, 0x20u);
 	  g_curTextCharInput = 0;
-	  
-	  
+
+
 	  Fuck there is so much stuff just for the initialization HELP
 	*/
 
-	g_Player = Player();
-	g_Player.InitPlayer("player", 0, 1);
 
-	g_soundSource = SoundSource();
-	g_soundSource.InitSoundSource((char*)"sounds\\global\\globalsnd.txt");
+	g_Player = new Player();
+	g_Player->InitPlayer("player", 0, 1);
 
-	BuildBitmapFont(); //function uses '1280516' bytes of stack. I KNOW SHUT UP
+	g_soundSource = new SoundSource();
+	g_soundSource->InitSoundSource((char*)"sounds\\global\\globalsnd.txt");
 
-	g_pCursor = XCursor();
-	g_pCursor.InitCursor();
-	XCursor::theirCursor = &g_pCursor;
+	BuildBitmapFont(); //oKAY sorry ill do it on the heap not the stack
+
+	g_pCursor = new XCursor();
+	g_pCursor->InitCursor();
+	XCursor::theirCursor = g_pCursor;
 
 	HICON hIcon = LoadIconA(GetModuleHandle(NULL), (LPCSTR)0x83);
 	SendMessage(g_Window, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
