@@ -11,6 +11,7 @@
 #include "TextureFilmstrip.h"
 #include "Zone.h"
 #include "Controller.h"
+#include "Sprite.h"
 
 struct Engine {
 	public:
@@ -59,6 +60,12 @@ struct Engine {
 		static Controller g_PlayerZController;
 		static Controller g_PlayerRotController;
 		static XCursor* g_pCursor;
+		static Sprite* g_playerSprite;
+		static Sprite* g_CursorSprite;
+		static Sprite* CreateCursorSprite();
+		static int g_cursorContext;
+		static int g_playerGesture;
+		static int g_cursorPositionHistory;
 		static void InitGlobals();
 		static void SetColorFromIndex(int colorIndex);
 		static void DrawArbitraryScreenText(const char* text, float xPos, float yPos, int maxWidth, GLfloat scale, float zOffset, int colorIndex);

@@ -21,10 +21,16 @@ bool Engine::g_stagePlayExists = false;
 int Engine::g_ticksIntroStarted = 0;
 int Engine::fadeCurtainInCtr = 0;
 int Engine::g_numFramesRun = 0;
+int Engine::g_cursorContext = 0;
+int Engine::g_playerGesture = 0;
+int Engine::g_cursorPositionHistory = 0; //?? figure out this type
 
 float* Engine::g_gmf = nullptr;
 
 SoundSource* Engine::g_soundSource = nullptr;
+
+Sprite* Engine::g_playerSprite = nullptr;
+Sprite* Engine::g_CursorSprite = nullptr;
 
 TextureFilmstrip* Engine::g_TextureFilmstrips = nullptr;
 
@@ -737,50 +743,49 @@ long double Engine::glPrintPolygonalFont(char* __src, ...) {
 }
 
 void Engine::DrawArbitraryScreenText(const char* text, float xPos, float yPos, int maxWidth, GLfloat scale, float zOffset, int colorIndex) {
-	if (!text || text[0] == '\0') return;
+	int textLen = strlen(text);
 
-	int textLen = static_cast<int>(strlen(text));
-	int charIndex = 0;
-	int lineIndex = 0;
+	if (textLen <= 0) return;
 
 	SetColorFromIndex(colorIndex);
 
-	while (charIndex < textLen) {
+	int lineIndex = 0;
+	int charProgress = 0;
+
+	while (charProgress < textLen) {
 		glLoadIdentity();
 
-		float drawX = xPos - 25.0f;
-		float drawY = ((float)lineIndex * scale * -0.7f) + yPos;
-		float drawZ = zOffset - 2.0f;
+		float drawY = ((float)((float)lineIndex * scale) * -0.69999999f) + yPos;
 
-		glTranslatef(drawX, drawY, drawZ);
+		glTranslatef(xPos - 25.0f, drawY, zOffset - 2.0f);
 		glScalef(scale, scale, scale);
 
 		float currentLineWidth = 0.0f;
 
-		while (charIndex < textLen) {
-			char c = text[charIndex];
+		while (charProgress < textLen) {
+			char c = text[charProgress];
 			char charStr[2] = { c, '\0' };
 
-			int prevWidthInt = static_cast<int>(currentLineWidth);
-
-			float charWidth = glPrintPolygonalFont(charStr);
+			int prevWidthInt = (int)currentLineWidth;
+			float charWidth = (float)glPrintPolygonalFont(charStr);
 			currentLineWidth += charWidth;
 
 			if (c == (char)-25) {
 				currentLineWidth = (float)prevWidthInt;
 			}
 
-			charIndex++;
+			charProgress++;
 
-			if (charIndex < textLen && text[charIndex - 1] == ' ') {
-				if (currentLineWidth >= (float)maxWidth * 0.1f) {
+			if (charProgress > 0 && c == 32) {
+				if (currentLineWidth >= (float)((float)maxWidth * 0.1f)) {
 					lineIndex++;
-					goto wrap_new_line;
+					goto next_line;
 				}
 			}
 		}
-	wrap_new_line:;
+	next_line:;
 	}
+	glLoadIdentity();
 }
 
 void Engine::CutToBlack() {
@@ -833,19 +838,19 @@ void Engine::LoadingMessage() {
 				std::string subStatus = "(May take up to 60 seconds)";
 
 				if (Engine::g_numFramesRun <= 90) {
-					mainStatus = "Loading...";
+					mainStatus = "Loading Façade...";
 				}
 				else {
 					if (ctr <= 30) {
-						mainStatus = "Loading.";
+						mainStatus = "Loading Façade.";
 					}
 					else if (ctr <= 45) {
-						mainStatus = "Loading..";
+						mainStatus = "Loading Façade..";
 					}
 					else if (ctr <= 60) {
-						mainStatus = "Loading...";
+						mainStatus = "Loading Façade...";
 					}
-					else mainStatus = "Loading";
+					else mainStatus = "Loading Façade";
 
 					++ctr;
 
@@ -1201,6 +1206,19 @@ void Engine::SetColorFromIndex(int colorIndex) {
 	glColor4f(red, green, blue, alpha);
 }
 
+Sprite* Engine::CreateCursorSprite()
+{
+	Sprite* cursorSprite = new Sprite();
+
+	//to-do figure out that weird "cursor" initialization
+
+	g_cursorContext = 0;
+	g_playerGesture = 0;
+	g_cursorPositionHistory = 0;
+
+	return cursorSprite;
+}
+
 void Engine::InitGlobals() {
 	g_TextureFilmstrips = new TextureFilmstrip[18448];
 
@@ -1225,15 +1243,19 @@ void Engine::InitGlobals() {
 	InitCinematography();
 	InitPlayerNavigation();
 
+	g_playerSprite = new Sprite();
+	g_CursorSprite = CreateCursorSprite();
+
+	//CreateRoom();
+	// (*(void (__cdecl **)(int, _DWORD))(*(_DWORD *)g_CursorSprite + 36))(g_CursorSprite, 0);
 	/*
-	v2 = (Sprite *)operator new((unsigned int)&loc_14894);
-	  Sprite::Sprite(v2);
-	  g_PlayerSprite = (int)v2;
-	  (*(void (__cdecl **)(Sprite *, int, const char *, _DWORD, int, int))(*(_DWORD *)v2 + 8))(v2, 2, "player", 0, 1, -1);
+	(*(void (__cdecl **)(Sprite *, int, const char *, _DWORD, int, int))(*(_DWORD *)v2 + 8))(v2, 2, "player", 0, 1, -1);
 	  (*(void (__cdecl **)(int, _DWORD))(*(_DWORD *)g_PlayerSprite + 36))(g_PlayerSprite, 0);
-	  g_CursorSprite = (int)CreateCursorSprite();
-	  (*(void (__cdecl **)(int, _DWORD))(*(_DWORD *)g_CursorSprite + 36))(g_CursorSprite, 0);
-	  CreateRoom();
+	*/
+
+	/*
+
+	  
 	  InitGraceSprite();
 	  InitTripSprite();
 	  InitTransRotScale(0, 0);
@@ -1264,7 +1286,7 @@ void Engine::InitGlobals() {
 	g_soundSource = new SoundSource();
 	g_soundSource->InitSoundSource((char*)"sounds\\global\\globalsnd.txt");
 
-	BuildBitmapFont(); //oKAY sorry ill do it on the heap not the stack
+	BuildBitmapFont();
 
 	g_pCursor = new XCursor();
 	g_pCursor->InitCursor();
