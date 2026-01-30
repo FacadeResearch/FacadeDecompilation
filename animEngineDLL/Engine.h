@@ -67,6 +67,15 @@ struct Engine {
 		static int g_playerGesture;
 		static int g_cursorPositionHistory;
 		static void InitGlobals();
+		static void CreateRoom();
+		static Sprite* CreatePanel(int spriteId, uint32_t nameId, int param3, int objectType, uint32_t param5, uint32_t param6, uint32_t param7, uint32_t param8, uint32_t param9, int param10, int param11, uint32_t color1, uint32_t texture, uint32_t color2, uint32_t posX, uint32_t posY, uint32_t posZ, int param16, int param17);
+		static void CreateCouchSprite(int spriteId, uint32_t nameId);
+		static void CreateCabinetSprite(int spriteId, uint32_t nameId);
+		static void CreateSideTableSprite(int spriteId, uint32_t nameId);
+		static void CreateWorkTableSprite(int spriteId, uint32_t nameId);
+		static void CreateBarSprite(int spriteId, uint32_t nameId);
+		static void CreateLuxTableSprite(int spriteId, uint32_t nameId);
+		static int GetFullDrinkLevel(bool isTrip);
 		static void SetColorFromIndex(int colorIndex);
 		static void DrawArbitraryScreenText(const char* text, float xPos, float yPos, int maxWidth, GLfloat scale, float zOffset, int colorIndex);
 		static void StartFade(float speed);
